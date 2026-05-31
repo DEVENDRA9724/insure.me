@@ -6,8 +6,7 @@ pipeline {
             steps {
                 echo 'Building application...'
                 checkout scm
-                sh 'chmod +x mvnw'
-                sh './mvnw clean package -DskipTests'
+                sh 'mvn clean package -DskipTests'
             }
         }
         
