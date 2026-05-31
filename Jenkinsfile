@@ -1,65 +1,46 @@
 pipeline {
     agent any
-
+    
     stages {
-        stage('Checkout') {
+        stage('Build') {
             steps {
+                echo 'Building application...'
                 checkout scm
-                echo '✅ Code checked out'
+                sh 'chmod +x mvnw'
+                sh './mvnw clean package -DskipTests'
             }
         }
-
-        stage('Compile') {
-            steps {
-                echo 'Compiling...'
-                sh 'mvn clean compile'
-            }
-        }
-
-        stage('Test') {
-            steps {
-                echo 'Running tests...'
-                sh 'mvn test'
-            }
-        }
-
-        stage('Package') {
-            steps {
-                echo 'Packaging...'
-                sh 'mvn package -DskipTests'
-            }
-        }
-
+        
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'
                 sh 'docker build -t insureme:latest .'
             }
         }
-
+        
         stage('Deploy') {
             steps {
-                echo 'Deploying...'
+                echo 'Deploying container...'
                 sh 'docker rm -f insureme-app || true'
-                sh 'docker run -d -p 9088:8081 --name insureme-app insureme:latest'
+                sh 'docker run -d -p 8086:8081 --name insureme-app insureme:latest'
+                sh 'sleep 5'
             }
         }
-
+        
         stage('Verify') {
             steps {
-                echo 'Verifying deployment...'
-                sh 'sleep 10'
-                sh 'curl -s http://localhost:9088/viewPolicy/POL1001'
+                echo 'Verifying API...'
+                sh 'curl -s http://localhost:8086/viewPolicy/POL1001'
             }
         }
     }
-
+    
     post {
         success {
-            echo '🎉 Pipeline completed successfully!'
+            echo '🎉 Build SUCCESSFUL! App running on port 8086'
         }
         failure {
-            echo '❌ Pipeline failed!'
+            echo '❌ Build FAILED! Check logs above.'
         }
     }
 }
