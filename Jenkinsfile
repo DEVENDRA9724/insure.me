@@ -1,6 +1,6 @@
 pipeline {
     agent any
-    
+
     stages {
         stage('Checkout') {
             steps {
@@ -8,35 +8,35 @@ pipeline {
                 echo '✅ Code checked out'
             }
         }
-        
+
         stage('Compile') {
             steps {
                 echo 'Compiling...'
                 sh 'mvn clean compile'
             }
         }
-        
+
         stage('Test') {
             steps {
                 echo 'Running tests...'
                 sh 'mvn test'
             }
         }
-        
+
         stage('Package') {
             steps {
                 echo 'Packaging...'
                 sh 'mvn package -DskipTests'
             }
         }
-        
+
         stage('Docker Build') {
             steps {
                 echo 'Building Docker image...'
                 sh 'docker build -t insureme:latest .'
             }
         }
-        
+
         stage('Deploy') {
             steps {
                 echo 'Deploying...'
@@ -44,7 +44,7 @@ pipeline {
                 sh 'docker run -d -p 9088:8081 --name insureme-app insureme:latest'
             }
         }
-        
+
         stage('Verify') {
             steps {
                 echo 'Verifying deployment...'
@@ -53,7 +53,7 @@ pipeline {
             }
         }
     }
-    
+
     post {
         success {
             echo '🎉 Pipeline completed successfully!'
